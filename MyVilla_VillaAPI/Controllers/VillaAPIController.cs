@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using MyVilla_VillaAPI.Data;
+using MyVilla_VillaAPI.Logging;
 using MyVilla_VillaAPI.Models.Dto;
 
 namespace MyVilla_VillaAPI.Controllers
@@ -10,10 +11,20 @@ namespace MyVilla_VillaAPI.Controllers
     [ApiController]
     public class VillaAPIController : ControllerBase
     {
+        //private readonly ILogger<VillaAPIController> _logger;
+        private readonly ILogging _logger;
+
+        //public VillaAPIController(ILogger<VillaAPIController> logger)
+        public VillaAPIController(ILogging logger)
+        {
+            _logger = logger;
+        }
+
         #region Get
         [HttpGet]
         public ActionResult<IEnumerable<VillaDTO>> GetVillas()
         {
+            _logger.Log("Getting all villas", "");
             return Ok(VillaStore.villaList);
         }
 
@@ -30,6 +41,7 @@ namespace MyVilla_VillaAPI.Controllers
         {
             if (id == 0)
             {
+                _logger.Log("Get Villa Error with Id " + id, "error");
                 return BadRequest();
             }
             var vila =  VillaStore.villaList.FirstOrDefault(u => u.Id == id);
@@ -52,7 +64,7 @@ namespace MyVilla_VillaAPI.Controllers
             //{
             //    return BadRequest(ModelState);
             //}
-            if (VillaStore.villaList.FirstOrDefault(u => u.Name.ToLower() == villaDTO.Name.ToLower()) != null)
+            if (VillaStore.villaList.FirstOrDefault(u => u.Name?.ToLower() == villaDTO.Name?.ToLower()) != null)
             {
                 ModelState.AddModelError("CustomError", "Villa already Exists");
                 return BadRequest(ModelState);
@@ -109,7 +121,9 @@ namespace MyVilla_VillaAPI.Controllers
             villa.Sqft = villaDTO.Sqft;
             return NoContent();
         }
-        
+        #endregion
+
+        #region Patch
         [HttpPatch("{id:int}", Name = "PatchVilla")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -125,8 +139,6 @@ namespace MyVilla_VillaAPI.Controllers
             return NoContent();
         }
         #endregion
-
-
 
     }
 }
