@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyVilla_VillaAPI.Data;
@@ -14,9 +16,12 @@ namespace MyVilla_VillaAPI.Controllers
     public class VillaAPIController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
-        public VillaAPIController(ApplicationDbContext dbContext)
+        private readonly IMapper _mapper;
+
+        public VillaAPIController(ApplicationDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
         #region Get
@@ -24,7 +29,8 @@ namespace MyVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<VillaDTO>>> GetVillas()
         {
-            return Ok( await _dbContext.Villas.ToListAsync());
+            IEnumerable<Villa> villaList = await _dbContext.Villas.ToListAsync();
+            return Ok(_mapper.Map<List<VillaDTO>>(villaList));
         }
 
         [HttpGet("{id:int}", Name ="GetVilla")]
@@ -38,12 +44,12 @@ namespace MyVilla_VillaAPI.Controllers
                 //_logger.Log("Get Villa Error with Id " + id, "error");
                 return BadRequest();
             }
-            var vila = await _dbContext.Villas.FirstOrDefaultAsync(u => u.Id == id);
-            if (vila == null) 
+            var villa = await _dbContext.Villas.FirstOrDefaultAsync(u => u.Id == id);
+            if (villa == null) 
             {
                 return NotFound();
             }
-            return Ok(vila);
+            return Ok(_mapper.Map<VillaDTO>(villa));
         }
         #endregion
 
@@ -52,27 +58,18 @@ namespace MyVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<VillaDTO>> CreateVilla([FromBody] VillaCreateDTO villaDTO)
+        public async Task<ActionResult<VillaDTO>> CreateVilla([FromBody] VillaCreateDTO createDTO)
         {
-            if (await _dbContext.Villas.FirstOrDefaultAsync(u => u.Name.ToLower() == villaDTO.Name.ToLower()) != null)
+            if (await _dbContext.Villas.FirstOrDefaultAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
             {
                 ModelState.AddModelError("CustomError", "Villa already Exists");
                 return BadRequest(ModelState);
             }
-            if(villaDTO == null)
+            if(createDTO == null)
             {
-                return BadRequest(villaDTO);
+                return BadRequest(createDTO);
             }
-            Villa villa = new()
-            {
-                Name = villaDTO.Name,
-                Details = villaDTO.Details,
-                ImageUrl = villaDTO.ImageUrl,
-                Occupancy = villaDTO.Occupancy,
-                Rate = villaDTO.Rate,
-                Sqft = villaDTO.Sqft,
-                Amenity = villaDTO.Amenity
-            };
+            Villa villa = _mapper.Map<Villa>(createDTO);
             await _dbContext.Villas.AddAsync(villa);
             await _dbContext.SaveChangesAsync();
             return CreatedAtRoute("GetVilla", new { id = villa.Id }, villa);
@@ -100,21 +97,11 @@ namespace MyVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateVilla(int id, [FromBody] VillaUpdateDTO villaDTO)
+        public async Task<IActionResult> UpdateVilla(int id, [FromBody] VillaUpdateDTO updateDTO)
         {
-            if (villaDTO == null || id != villaDTO.Id) return BadRequest();
-            Villa model = new()
-            {
-                Id = villaDTO.Id,
-                Name = villaDTO.Name,
-                Details = villaDTO.Details,
-                ImageUrl = villaDTO.ImageUrl,
-                Occupancy = villaDTO.Occupancy,
-                Rate = villaDTO.Rate,
-                Sqft = villaDTO.Sqft,
-                Amenity = villaDTO.Amenity
-            };
-            _dbContext.Villas.Update(model);
+            if (updateDTO == null || id != updateDTO.Id) return BadRequest();
+            Villa villa = _mapper.Map<Villa>(updateDTO);    
+            _dbContext.Villas.Update(villa);
             await _dbContext.SaveChangesAsync();
             return NoContent();
         }
@@ -129,30 +116,10 @@ namespace MyVilla_VillaAPI.Controllers
             if (patchDTO == null || id == 0) return BadRequest();
             var villa = await _dbContext.Villas.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
             if (villa == null) return BadRequest();
-            VillaUpdateDTO villaDTO = new()
-            {
-                Id = villa.Id,
-                Name = villa.Name,
-                Details = villa.Details,
-                ImageUrl = villa.ImageUrl,
-                Occupancy = villa.Occupancy,
-                Rate = villa.Rate,
-                Sqft = villa.Sqft,
-                Amenity = villa.Amenity
-            };
+            VillaUpdateDTO villaDTO = _mapper.Map<VillaUpdateDTO>(villa);
             patchDTO.ApplyTo(villaDTO, ModelState);
             if (!ModelState.IsValid) return BadRequest();
-            Villa model = new()
-            {
-                Id = villaDTO.Id,
-                Name = villaDTO.Name,
-                Details = villaDTO.Details,
-                ImageUrl = villaDTO.ImageUrl,
-                Occupancy = villaDTO.Occupancy,
-                Rate = villaDTO.Rate,
-                Sqft = villaDTO.Sqft,
-                Amenity = villaDTO.Amenity
-            };
+            Villa model = _mapper.Map<Villa>(villaDTO);
             _dbContext.Villas.Update(model);
             await _dbContext.SaveChangesAsync();
             return NoContent();
