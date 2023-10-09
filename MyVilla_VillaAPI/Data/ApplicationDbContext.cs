@@ -10,10 +10,12 @@ namespace MyVilla_VillaAPI.Data
         {
         }
         public DbSet<Villa> Villas { get; set; }
+        public DbSet<VillaNumber> VillaNumbers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region Seed Villas Table
             modelBuilder.Entity<Villa>().HasData(
-               new Villa
+              new Villa
                {
                    Id = 1,
                    Name = "Royal Villa",
@@ -74,6 +76,18 @@ namespace MyVilla_VillaAPI.Data
                   CreatedDate = DateTime.Now
               }
             );
+            #endregion
+
+            #region Seed VillaNumbers Table
+            modelBuilder.Entity<VillaNumber>().HasData(
+              new VillaNumber
+              {
+                  VillNo = 1,
+                  SpecialDetails = "special defect",
+                  CreatedDate = DateTime.Now
+              }
+            );
+            #endregion
         }
     }
 }
