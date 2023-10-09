@@ -17,11 +17,13 @@ namespace MyVilla_VillaAPI.Controllers
     [ApiController]
     public class VillaNumberAPIController : ControllerBase
     {
+        private readonly IVillaRepository _dbVilla;
         private readonly IVillaNumberRepository _dbVillaNumber;
         private readonly IMapper _mapper;
         protected APIResponse _response;
-        public VillaNumberAPIController(IVillaNumberRepository dbVillaNumber, IMapper mapper)
+        public VillaNumberAPIController(IVillaRepository dbVilla, IVillaNumberRepository dbVillaNumber, IMapper mapper)
         {
+            _dbVilla = dbVilla;
             _dbVillaNumber = dbVillaNumber;
             _mapper = mapper;
             this._response = new();
@@ -94,6 +96,11 @@ namespace MyVilla_VillaAPI.Controllers
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
+                }
+                if (await _dbVilla.GetAsync(u => u.Id == createDTO.VillaId) == null) 
+                {
+                    ModelState.AddModelError("CustomError", "Villa Id is Invalid");
+                    return BadRequest(ModelState);
                 }
                 if (await _dbVillaNumber.GetAsync(u => u.VillNo == createDTO.VillNo) != null)
                 {
@@ -170,6 +177,11 @@ namespace MyVilla_VillaAPI.Controllers
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
+                }
+                if (await _dbVilla.GetAsync(u => u.Id == updateDTO.VillaId) == null)
+                {
+                    ModelState.AddModelError("CustomError", "Villa Id is Invalid");
+                    return BadRequest(ModelState);
                 }
                 VillaNumber villaNumber = _mapper.Map<VillaNumber>(updateDTO);
                 await _dbVillaNumber.UpdateAsync(villaNumber);
