@@ -60,7 +60,7 @@ namespace MyVilla_VillaAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Villas");
+                    b.ToTable("Villas", (string)null);
 
                     b.HasData(
                         new
@@ -151,7 +151,7 @@ namespace MyVilla_VillaAPI.Migrations
 
                     b.HasIndex("VillaId");
 
-                    b.ToTable("VillaNumbers");
+                    b.ToTable("VillaNumbers", (string)null);
 
                     b.HasData(
                         new

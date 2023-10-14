@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using MyVilla_Web.Models;
+using MyVilla_Web.Models.Dto;
+using MyVilla_Web.Services.IServices;
+using Newtonsoft.Json;
 
 namespace MyVilla_Web.Controllers
 {
@@ -17,7 +18,7 @@ namespace MyVilla_Web.Controllers
         }
 
 
-        public async Task<IActionResult> IndexVilla()
+        public async Task<IActionResult> IndexVillaNumber()
         {
             List<VillaNumberDTO> villaList = new();
             var response = await _villaNumberService.GetALLAsync<APIResponse>();
