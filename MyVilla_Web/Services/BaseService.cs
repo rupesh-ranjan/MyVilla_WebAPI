@@ -1,7 +1,9 @@
-﻿using MyVilla_Utility;
+﻿using Humanizer;
+using MyVilla_Utility;
 using MyVilla_Web.Models;
 using MyVilla_Web.Services.IServices;
 using Newtonsoft.Json;
+using System.Net;
 using System.Text;
 
 namespace MyVilla_Web.Services
@@ -48,8 +50,23 @@ namespace MyVilla_Web.Services
                 HttpResponseMessage apiResponse = null;
                 apiResponse = await client.SendAsync(message);
                 var apiContent = await apiResponse.Content.ReadAsStringAsync();
-                var APIResponse = JsonConvert.DeserializeObject<T>(apiContent);
-                return APIResponse;
+                try
+                {
+                    APIResponse APIResponse = JsonConvert.DeserializeObject<APIResponse>(apiContent);
+                    if (apiResponse.StatusCode == HttpStatusCode.BadRequest || apiResponse.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        APIResponse.StatusCode = HttpStatusCode.BadRequest;
+                        APIResponse.IsSuccess = false;
+                        var response = JsonConvert.SerializeObject(APIResponse);
+                        return JsonConvert.DeserializeObject<T>(response);
+                    }
+                }
+                catch (Exception)
+                {
+                    return JsonConvert.DeserializeObject<T>(apiContent);
+                    
+                }
+                return JsonConvert.DeserializeObject<T>(apiContent);
             }
             catch (Exception ex)
             {
