@@ -59,15 +59,19 @@ namespace MyVilla_VillaAPI.Controllers.v1
         {
             try
             {
-                if (id == 0)
+                if (id < 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages.Add("Id for villa Number should be greater than 0");
                     return BadRequest(_response);
                 }
                 var villaNumber = await _dbVillaNumber.GetAsync(u => u.VillNo == id);
                 if (villaNumber == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages.Add("Villa Number not found");
                     return BadRequest(_response);
                 }
                 _response.Result = _mapper.Map<VillaNumberDTO>(villaNumber);

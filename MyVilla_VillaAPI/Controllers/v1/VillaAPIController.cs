@@ -80,15 +80,19 @@ namespace MyVilla_VillaAPI.Controllers
         {
             try
             {
-                if (id == 0)
+                if (id < 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages.Add("Id for villa should be greater than 0");
                     return BadRequest(_response);
                 }
                 var villa = await _dbVilla.GetAsync(u => u.Id == id);
                 if (villa == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.IsSuccess = false;
+                    _response.ErrorMessages.Add("Villa not found");
                     return BadRequest(_response);
                 }
                 _response.Result = _mapper.Map<VillaDTO>(villa);
