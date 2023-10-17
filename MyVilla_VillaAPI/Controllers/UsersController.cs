@@ -6,7 +6,7 @@ using System.Net;
 
 namespace MyVilla_VillaAPI.Controllers
 {
-    [Route("api/UserAuth")]
+    [Route("api/UsersAuth")]
     [ApiController]
     public class UsersController : Controller
     {
@@ -18,7 +18,7 @@ namespace MyVilla_VillaAPI.Controllers
             _response = new APIResponse();
         }
 
-        [HttpPost("loging")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
             var loginResponse = await _userRepository.Login(model);
