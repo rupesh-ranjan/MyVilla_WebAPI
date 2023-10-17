@@ -10,6 +10,7 @@ using MyVilla_VillaAPI.Models;
 using MyVilla_VillaAPI.Models.Dto;
 using MyVilla_VillaAPI.Repository.IRepostiory;
 using System.Net;
+using System.Text.Json;
 
 namespace MyVilla_VillaAPI.Controllers
 {
@@ -35,21 +36,24 @@ namespace MyVilla_VillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> GetVillas([FromQuery(Name = "Filter by total occupany")]int? occupancy, [FromQuery]string? search)
+        public async Task<ActionResult<APIResponse>> GetVillas([FromQuery(Name = "Filter by total occupany")]int? occupancy,
+            [FromQuery]string? search, int pageSize = 2, int pageNumber = 1)
         {
             try
             {
                 IEnumerable<Villa> villaList;
                 if (occupancy > 0)
-                    villaList = await _dbVilla.GetAllAsync(u => u.Occupancy == occupancy);
+                    villaList = await _dbVilla.GetAllAsync(u => u.Occupancy == occupancy, pageSize:pageSize, pageNumber:pageNumber);
                 else
-                    villaList = await _dbVilla.GetAllAsync();
+                    villaList = await _dbVilla.GetAllAsync(pageSize: pageSize, pageNumber: pageNumber);
 
                 if (!string.IsNullOrEmpty(search))
                 {
                     villaList = villaList.Where(u => u.Amenity.Contains(search, StringComparison.OrdinalIgnoreCase) 
                                                     || u.Name.Contains(search, StringComparison.OrdinalIgnoreCase));
                 }
+                Pagination pagination = new() { PageNumber = pageNumber, PageSize = pageSize };
+                Response.Headers.Add("X-Paginaton", JsonSerializer.Serialize(pagination));
 
                 _response.Result = _mapper.Map<List<VillaDTO>>(villaList);
                 _response.StatusCode = HttpStatusCode.OK;
