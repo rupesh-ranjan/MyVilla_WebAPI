@@ -58,7 +58,8 @@ namespace MyVilla_Web.Services
                 try
                 {
                     APIResponse APIResponse = JsonConvert.DeserializeObject<APIResponse>(apiContent);
-                    if (apiResponse.StatusCode == HttpStatusCode.BadRequest || apiResponse.StatusCode == HttpStatusCode.NotFound)
+                    if (APIResponse != null && 
+                        (apiResponse.StatusCode == HttpStatusCode.BadRequest || apiResponse.StatusCode == HttpStatusCode.NotFound))
                     {
                         APIResponse.StatusCode = HttpStatusCode.BadRequest;
                         APIResponse.IsSuccess = false;

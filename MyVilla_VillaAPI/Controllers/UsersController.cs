@@ -6,7 +6,9 @@ using System.Net;
 
 namespace MyVilla_VillaAPI.Controllers
 {
-    [Route("api/UsersAuth")]
+    [Route("api/v{version:apiVersion}/UsersAuth")]
+    //[ApiVersion("1.0")]
+    [ApiVersionNeutral]
     [ApiController]
     public class UsersController : Controller
     {

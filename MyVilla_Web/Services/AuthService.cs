@@ -22,7 +22,7 @@ namespace MyVilla_Web.Services
             {
                 ApiType = SD.ApiType.POST,
                 Data = loginRequestDTO,
-                Url = villaUrl + "/api/UsersAuth/login"
+                Url = villaUrl + "/api/v1/UsersAuth/login"
             });
         }
 
@@ -32,7 +32,7 @@ namespace MyVilla_Web.Services
             {
                 ApiType = SD.ApiType.POST,
                 Data = registerationRequestDTO,
-                Url = villaUrl + "/api/UsersAuth/register"
+                Url = villaUrl + "/api/v1/UsersAuth/register"
             });
         }
     }
