@@ -6,6 +6,7 @@ using MyVilla_Web.Models;
 using MyVilla_Web.Models.Dto;
 using MyVilla_Web.Services.IServices;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace MyVilla_Web.Controllers
@@ -32,9 +33,13 @@ namespace MyVilla_Web.Controllers
             if (response != null && response.IsSuccess)
             {
                 LoginResponseDTO loginResponseDTO = JsonConvert.DeserializeObject<LoginResponseDTO>(Convert.ToString(response.Result));
+
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(loginResponseDTO.Token);
+
                 var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
-                identity.AddClaim(new Claim(ClaimTypes.Name, loginResponseDTO.User.UserName));
-                identity.AddClaim(new Claim(ClaimTypes.Role, loginResponseDTO.User.Role));
+                identity.AddClaim(new Claim(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == "unique_name").Value));
+                identity.AddClaim(new Claim(ClaimTypes.Role, jwt.Claims.FirstOrDefault(u => u.Type == "role").Value));
                 var principal = new ClaimsPrincipal(identity);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
@@ -65,6 +70,7 @@ namespace MyVilla_Web.Controllers
             {
                 return RedirectToAction("Login");
             }
+            TempData["error"] = "Error encounterd";
             return View();
         }
         #endregion

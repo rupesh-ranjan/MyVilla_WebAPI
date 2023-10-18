@@ -57,7 +57,7 @@ namespace MyVilla_VillaAPI.Repository
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.UserName.ToString()),
                     new Claim(ClaimTypes.Role, roles.FirstOrDefault())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
@@ -69,7 +69,7 @@ namespace MyVilla_VillaAPI.Repository
             {
                 Token = tokenHandler.WriteToken(token),
                 User = _mapper.Map<UserDTO>(user),
-                Role = roles.FirstOrDefault()
+                //Role = roles.FirstOrDefault()
             };
             return loginResponseDTO;
 
@@ -101,9 +101,8 @@ namespace MyVilla_VillaAPI.Repository
             }
             catch (Exception ex)
             {
-
             }
-            return new UserDTO();
+            return null;
         }
     }
 }
