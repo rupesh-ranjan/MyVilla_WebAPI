@@ -7,6 +7,6 @@ namespace MyVilla_VillaAPI.Repository.IRepostiory
     {
         bool ISUniqueUser (string username);
         Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO);
-        Task<LocalUser> Register(RegisterationRequestDTO registerationRequestDTO);
+        Task<UserDTO> Register(RegisterationRequestDTO registerationRequestDTO);
     }
 }
